@@ -13,11 +13,11 @@ ARCHITECTURE rs232_write_arch OF rs232_write IS
   SIGNAL RST   		:  STD_LOGIC ; -- Reset
   SIGNAL CLK   		:  std_logic ; -- Clock
   SIGNAL NBaud 		:  std_logic_vector (3 downto 0) ; -- BaudRateIndex
-  SIGNAL STR   		:  STD_LOGIC  ; 
+  SIGNAL STR   		:  STD_LOGIC ; -- Start transmission
   SIGNAL DATAWR   	:  std_logic_vector (7 downto 0)  ; 
   SIGNAL FBaud_out   :  STD_LOGIC ; -- Ok signal for when the counter is over
-  SIGNAL EOT   		:  STD_LOGIC  ; 
-  SIGNAL Tx   			:  STD_LOGIC  ; 
+  SIGNAL EOT   		:  STD_LOGIC ; -- End of transmission
+  SIGNAL Tx   			:  STD_LOGIC ; -- Data transmitted
   
   CONSTANT HALF_PERIOD : time := 10 ns; -- Clock (50 MHz) half-period
   
@@ -46,7 +46,7 @@ BEGIN
       Tx   			=> Tx) ; 
 
 
-
+-- "Reset Pattern"
   Process
 	Begin
 	 RST  <= '1'  ;
@@ -64,31 +64,28 @@ BEGIN
 	 CLK <= '1' ;
 	 wait for HALF_PERIOD;
  End Process;
-
-
--- "Constant Pattern"
--- Start Time = 0 ps, End Time = 4 us, Period = 0 ps
-  Process
+ 
+ 
+ -- "Transmitted value update Pattern"
+  Process(RST, EOT)
 	Begin
-	 STR  <= '1'  ;
-	wait;
+		if(RST = '1') then
+			STR <= '1';
+			DATAWR <= "00000000"; -- 0x00
+		elsif(EOT'event and EOT='1') then
+			case DATAWR is
+				when "00000000" => DATAWR <= "01110111"  ; -- 0x77
+				when "01110111" => DATAWR <= "00101010"; --0x2A
+				when "00101010" => DATAWR <= "10110111"; --0xB7
+				when others => STR <= '0';
+			end case;
+		end if;
  End Process;
 
-
--- "Constant Pattern"
--- Start Time = 0 ps, End Time = 4 us, Period = 0 ps
+-- "NBaud Pattern"
   Process
 	Begin
-	 DATAWR  <= "01110111"  ;
-	wait;
- End Process;
-
-
--- "Constant Pattern"
--- Start Time = 0 ps, End Time = 4 us, Period = 0 ps
-  Process
-	Begin
-	 NBaud  <= "1101"  ;
+	 NBaud  <= "1101"  ; -- cfr BaudRate
 	wait;
  End Process;
 END;

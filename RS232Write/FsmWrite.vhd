@@ -14,33 +14,36 @@ end FsmWrite;
 
 architecture simple of FsmWrite is
 
-signal Qp, Qn   : std_logic_vector(3 downto 0);
+signal Qp, Qn   : std_logic_vector(3 downto 0); -- Buffers p=present, n=next
 
 begin                                
     COMB: process(Qp,STR,FBaud)
     begin
         case Qp is
             when "0000" =>
-                CTRL<= "0000";  -- Hold
-                EOT<= '1';
-                if(STR= '0')then
-                    Qn<= Qp;
+                CTRL	<= "0000";  -- Hold
+                EOT	<= '1'	;	-- Transmission is on hold (transmitter ready to transmit)
+                if(STR= '0')then	-- Keeps the transmission on hold while Start is 0
+                    Qn<= Qp	;
                 else 
                     Qn<= "0001";
                 end if;
             
             when "0001" =>
-                CTRL<= "0000";  -- Hold
-                EOT<= '0';
-                if(FBaud= '1')then
-                    Qn<= "0010";
+                CTRL	<= "0000";  -- Hold
+                EOT	<= '0'	;	-- Transmission began, the transmitter is busy
+                if(FBaud= '0')then -- Keeps the value while the counter is counting
+                    Qn<= Qp	;
                 else 
-                    Qn<= Qp;
+                    Qn<= "0010";
                 end if;
             
+				-- The two steps above are used as a synchronisation signal (a '1' and a '0' are sent
+				--	before each new transmitted data)
+				
             when "0010" =>
-                CTRL<= "0001";  -- Start
-                EOT<= '0';
+                CTRL	<= "0001";  -- Start
+                EOT	<= '0'	;	-- Transmission began, the transmitter is busy
                 if(FBaud= '0')then
                     Qn<= Qp;
                 else
@@ -137,14 +140,14 @@ begin
             
         end process COMB;
         
-        FF: process(RST,CLK)
-        begin  
-            if(RST='1')then
-                Qp<= "0000";
-            elsif(CLK'event and CLK='1')then
-                Qp<= Qn;
-            end if;         
-            
-        end process;
+	  Update: process(RST,CLK)
+	  begin  
+			if(RST='1')then
+				 Qp<= "0000";
+			elsif(CLK'event and CLK='1')then
+				 Qp<= Qn;
+			end if;         
+			
+	  end process Update;
         
 end simple;

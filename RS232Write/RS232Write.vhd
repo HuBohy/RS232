@@ -12,7 +12,7 @@ entity RS232Write is
     DATAWR  :   in  std_logic_vector(7 downto 0); -- Data to write
     NBaud : in  std_logic_vector(3 downto 0); -- Baud rate index
 	 
-	 FBaud_out 	: 	out std_logic;
+	 FBaud_out 	: 	out std_logic; -- Wire to see when the counter is over
 	 
     EOT     :   out std_logic; -- End of Transmission
     Tx      :   out std_logic -- Data transmitted
@@ -20,7 +20,7 @@ entity RS232Write is
 end RS232Write;
 
 architecture moore of RS232Write is
-signal CTRL    :   std_logic_vector(3 downto 0);
+signal CTRL    :   std_logic_vector(3 downto 0); -- Control sequence for the transmission
 signal FBaud   :   std_logic; -- Counter finished
 
 component BaudRate
@@ -56,9 +56,9 @@ end component;
 begin
 	 FBaud_out <= FBaud;
 
-    U00 : BaudRate port map(RST,CLK,NBaud,FBaud);
-    U01 : RightShift port map(RST,CLK,CTRL,DATAWR,Tx);
-    U02 : FsmWrite port map(RST,CLK,STR,FBaud,EOT,CTRL);
+    BR : BaudRate port map(RST,CLK,NBaud,FBaud);
+    RS : RightShift port map(RST,CLK,CTRL,DATAWR,Tx);
+    FSM : FsmWrite port map(RST,CLK,STR,FBaud,EOT,CTRL);
  
 end moore;
 

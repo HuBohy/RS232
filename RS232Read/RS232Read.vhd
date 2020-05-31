@@ -43,8 +43,8 @@ component FSMRead is
 	port(
 	RST		:	in	std_logic;
 	CLK		:	in 	std_logic;
-	Rx		:	in	std_logic;
-	FBaud	:	in	std_logic;
+	Rx			:	in	std_logic;
+	FBaud		:	in	std_logic;
 	DTR		:	out	std_logic;
 	Stop		:	out	std_logic;
 	RTR		:	out std_logic

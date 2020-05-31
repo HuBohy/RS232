@@ -27,7 +27,7 @@ begin
 		
 		case NBaud is
 			when "0000"=>
-			NB<= "1111010000100100000";	-- 110 Bauds (500001)
+			NB<= "1101110111110010010";	-- 110 Bauds (454546)
 			when "0001"=>		
 			NB<= "0101000101100001010";	-- 300 Bauds (166667)
 			when "0010"=>
@@ -65,7 +65,7 @@ begin
 			else
 				if(Qp= "0000000000000000000")then
 					Qn<= NB;
-					FBaud<= '1';-- Counter at 0, we can continue (FBaud = OK, load next bit)
+					FBaud<= '1';	-- Counter at 0, we can continue (FBaud = OK, load next bit)
 				else
 					Qn<= Qp-1 ;
 					FBaud<= '0';

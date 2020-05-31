@@ -13,7 +13,7 @@ end RightShift;
 
 architecture simple of RightShift is
 
-signal  Txn, Txp: std_logic;
+signal  Txn, Txp: std_logic; -- Buffer : p=present, n=next
 
 begin  
     
@@ -36,19 +36,16 @@ begin
             
     end process MUX;
     
-    FF: process(RST,CLK)
-    begin
-        
-        if(RST='1')then
-            Txp<= '0';
-        elsif(CLK'event and CLK='1')then
-            Txp<= Txn;
-        end if;     
+    Update: process(RST,CLK)
+    begin  
+		if(RST='1')then
+			Txp<= '0';
+		elsif(CLK'event and CLK='1')then
+			Txp<= Txn;
+		end if;     
                 
-    Tx <= Txp;   
+		Tx <= Txp;   -- Update the transmitted data
 	 
-    end process FF;   
-    
-    
+    end process Update;   
     
 end simple;
